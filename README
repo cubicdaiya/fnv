@@ -1,0 +1,6 @@
+
+fnv is the FNV hash table implimentation written by C with C99 style.
+
+Copyright(C) 2010  Tatsuhiko Kubo <cubicdaiya@gmail.com>
+
+

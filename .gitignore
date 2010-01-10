@@ -1,0 +1,7 @@
+a.out
+GPATH
+GTAGS
+GRTAGS
+GSYMS
+test/fnv_test
+*.o
