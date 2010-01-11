@@ -5,7 +5,7 @@
  */
 static uint_t fnv_hash(const char *k);
 static fnv_t *fnv_ent_create();
-static fnv_t *fnv_get_tail(fnv_t *ent, const char *k);
+static fnv_t *fnv_get_tail(fnv_t *ent, const char *k, uint_t klen);
 static void fnv_ent_init(fnv_t *ent, const char *k, const char *v);
 
 void fnv_tbl_init(fnv_t *tbl, uint_t c) {
@@ -14,18 +14,18 @@ void fnv_tbl_init(fnv_t *tbl, uint_t c) {
   }
 }
 
-char *fnv_get(fnv_t *tbl, const char *k) {
+char *fnv_get(fnv_t *tbl, const char *k, uint_t klen) {
   uint_t h = fnv_hash(k);
   if (tbl[h].key == NULL) {
     return NULL;
   }
-  if (strcmp(tbl[h].key, k) == 0) {
+  if (strncmp(tbl[h].key, k, klen) == 0) {
     return tbl[h].val;
   } else {
     fnv_t *tail = &tbl[h];
     while (tail->next) {
       tail = tail->next;
-      if (strcmp(tail->key, k) == 0) {
+      if (strncmp(tail->key, k, klen) == 0) {
         return tail->val;
       }
     }
@@ -33,14 +33,13 @@ char *fnv_get(fnv_t *tbl, const char *k) {
   return NULL;
 }
 
-int fnv_put(fnv_t *tbl, const char *k, const char *v) {
-  // TODO put duplicate key
+int fnv_put(fnv_t *tbl, const char *k, const char *v, uint_t klen) {
   uint_t h = fnv_hash(k);
   if (tbl[h].key != NULL) {
-    if (strcmp(tbl[h].key, k) == 0) {
+    if (strncmp(tbl[h].key, k, klen) == 0) {
       return FNV_PUT_DUPLICATE;
     }
-    fnv_t *tail = fnv_get_tail(&tbl[h], k);
+    fnv_t *tail = fnv_get_tail(&tbl[h], k, klen);
     if (!tail) {
       return FNV_PUT_DUPLICATE;
     }
@@ -52,13 +51,13 @@ int fnv_put(fnv_t *tbl, const char *k, const char *v) {
   return FNV_PUT_SUCCESS;
 }
 
-int fnv_out(fnv_t *tbl, const char *k) {
+int fnv_out(fnv_t *tbl, const char *k, uint_t klen) {
   uint_t h    = fnv_hash(k);
   fnv_t *tail = &tbl[h];
   if (!tail || tail->key == NULL) {
     return FNV_OUT_NOTFOUND;
   }
-  if (strcmp(tail->key, k) == 0) {
+  if (strncmp(tail->key, k, klen) == 0) {
     tail->key = NULL;
     tail->val = NULL;
     if (tail->next) {
@@ -68,7 +67,7 @@ int fnv_out(fnv_t *tbl, const char *k) {
     while (tail->next) {
       fnv_t *current = tail;
       tail = tail->next;
-      if (strcmp(tail->key, k) == 0) {
+      if (strncmp(tail->key, k, klen) == 0) {
         tail->key = NULL;
         tail->val = NULL;
         if (tail->next) {
@@ -130,11 +129,11 @@ static void fnv_ent_init(fnv_t *ent, const char *k, const char *v) {
   ent->next = NULL;
 }
 
-static fnv_t *fnv_get_tail(fnv_t *ent, const char *k) {
+static fnv_t *fnv_get_tail(fnv_t *ent, const char *k, uint_t klen) {
   fnv_t *tail = ent;
   while (tail->next) {
     tail = tail->next;
-    if (strcmp(tail->key, k) == 0) {
+    if (strncmp(tail->key, k, klen) == 0) {
       return NULL;
     }
   }

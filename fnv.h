@@ -45,9 +45,9 @@ typedef struct fnv_s {
 } fnv_t;
 
 void fnv_tbl_init(fnv_t *tbl, uint_t c);
-char *fnv_get(fnv_t *tbl, const char *k);
-int fnv_put(fnv_t *tbl, const char *k, const char *v);
-int fnv_out(fnv_t *tbl, const char *k);
+char *fnv_get(fnv_t *tbl, const char *k, uint_t klen);
+int fnv_put(fnv_t *tbl, const char *k, const char *v, uint_t klen);
+int fnv_out(fnv_t *tbl, const char *k, uint_t klen);
 void fnv_tbl_destroy(fnv_t *tbl, uint_t c);
 void fnv_tbl_print(fnv_t *tbl, uint_t c);
 
