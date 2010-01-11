@@ -33,7 +33,7 @@ char *fnv_get(fnv_t *tbl, const char *k, uint_t klen) {
   return NULL;
 }
 
-int fnv_put(fnv_t *tbl, const char *k, const char *v, uint_t klen) {
+int fnv_put(fnv_t *tbl, const char *k, const char *v, uint_t klen, uint_t vlen) {
   uint_t h = fnv_hash(k);
   if (tbl[h].key != NULL) {
     if (strncmp(tbl[h].key, k, klen) == 0) {
