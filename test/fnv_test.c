@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <CUnit/CUnit.h>
-#include <CUnit/Console.h>
+#include <CUnit/Basic.h>
 #include "../fnv.h"
 
 /**
@@ -166,7 +166,7 @@ int main (int argc, char *argv[]) {
   CU_add_test(suite_fnv, "test_fnv_out_success", test_fnv_out_success);
   CU_add_test(suite_fnv, "test_fnv_out_notfound", test_fnv_out_notfound);
 
-  CU_console_run_tests();
+  CU_basic_run_tests();
   CU_cleanup_registry();
   
   return 0;
