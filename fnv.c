@@ -19,13 +19,13 @@ char *fnv_get(fnv_t *tbl, const char *k, uint_t klen) {
   if (tbl[h].key == NULL) {
     return NULL;
   }
-  if (strncmp(tbl[h].key, k, klen) == 0) {
+  if (strcmp(tbl[h].key, k) == 0) {
     return tbl[h].val;
   } else {
     fnv_t *tail = &tbl[h];
     while (tail->next) {
       tail = tail->next;
-      if (strncmp(tail->key, k, klen) == 0) {
+      if (strcmp(tail->key, k) == 0) {
         return tail->val;
       }
     }
@@ -36,7 +36,7 @@ char *fnv_get(fnv_t *tbl, const char *k, uint_t klen) {
 int fnv_put(fnv_t *tbl, const char *k, const char *v, uint_t klen, uint_t vlen) {
   uint_t h = fnv_hash(k);
   if (tbl[h].key != NULL) {
-    if (strncmp(tbl[h].key, k, klen) == 0) {
+    if (strcmp(tbl[h].key, k) == 0) {
       return FNV_PUT_DUPLICATE;
     }
     fnv_t *tail = fnv_get_tail(&tbl[h], k, klen);
@@ -57,7 +57,7 @@ int fnv_out(fnv_t *tbl, const char *k, uint_t klen) {
   if (!tail || tail->key == NULL) {
     return FNV_OUT_NOTFOUND;
   }
-  if (strncmp(tail->key, k, klen) == 0) {
+  if (strcmp(tail->key, k) == 0) {
     tail->key = NULL;
     tail->val = NULL;
     if (tail->next) {
@@ -67,7 +67,7 @@ int fnv_out(fnv_t *tbl, const char *k, uint_t klen) {
     while (tail->next) {
       fnv_t *current = tail;
       tail = tail->next;
-      if (strncmp(tail->key, k, klen) == 0) {
+      if (strcmp(tail->key, k) == 0) {
         tail->key = NULL;
         tail->val = NULL;
         if (tail->next) {
@@ -133,7 +133,7 @@ static fnv_t *fnv_get_tail(fnv_t *ent, const char *k, uint_t klen) {
   fnv_t *tail = ent;
   while (tail->next) {
     tail = tail->next;
-    if (strncmp(tail->key, k, klen) == 0) {
+    if (strcmp(tail->key, k) == 0) {
       return NULL;
     }
   }

@@ -25,7 +25,7 @@
 /**
  * config
  */
-#define FNV_TBL_CNT 1024
+#define FNV_TBL_CNT 1023
 #define FNV_PRIME 0x01000193
 #define FNV_OFFSET_BASIS 0x811c9dc5
 
