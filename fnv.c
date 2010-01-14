@@ -104,7 +104,7 @@ void fnv_tbl_destroy(fnv_tbl_t *tbl, size_t c) {
     fnv_ent_t *tail = ents[i].next;
     while (tail) {
       fnv_ent_t *current = tail;
-      tail           = tail->next;
+      tail = tail->next;
       FNV_FREE(current);
     }
   }
