@@ -4,72 +4,89 @@
  * private function
  */
 static uint_t fnv_hash(const char *k);
-static fnv_t *fnv_ent_create();
-static fnv_t *fnv_get_tail(fnv_t *ent, const char *k, uint_t klen);
-static void fnv_ent_init(fnv_t *ent, const char *k, const char *v);
+static fnv_ent_t *fnv_ent_create();
+static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz);
+static void fnv_ent_init(fnv_ent_t *ent, const char *k, const char *v);
+static bool fnv_isoversiz(size_t len, fnv_type_t t);
 
-void fnv_tbl_init(fnv_t *tbl, uint_t c) {
+fnv_tbl_t *fnv_tbl_create(fnv_ent_t *ents, size_t c) {
+  fnv_tbl_t *tbl;
+  FNV_MALLOC(tbl, sizeof(fnv_tbl_t));
+  tbl->ents = ents;
+  tbl->c    = c;
+  return tbl;
+}
+
+
+void fnv_tbl_init(fnv_tbl_t *tbl, size_t c) {
+  fnv_ent_t *ents = tbl->ents;
   for (int i=0;i<c;++i) {
-    fnv_ent_init(&tbl[i], NULL, NULL);
+    fnv_ent_init(&ents[i], NULL, NULL);
   }
 }
 
-char *fnv_get(fnv_t *tbl, const char *k, uint_t klen) {
+char *fnv_get(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
+  FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, NULL);
+  fnv_ent_t *ents = tbl->ents;
   uint_t h = fnv_hash(k);
-  if (tbl[h].key == NULL) {
+  if (ents[h].k == NULL) {
     return NULL;
   }
-  if (strcmp(tbl[h].key, k) == 0) {
-    return tbl[h].val;
+  if (strcmp(ents[h].k, k) == 0) {
+    return ents[h].v;
   } else {
-    fnv_t *tail = &tbl[h];
+    fnv_ent_t *tail = &ents[h];
     while (tail->next) {
       tail = tail->next;
-      if (strcmp(tail->key, k) == 0) {
-        return tail->val;
+      if (strcmp(tail->k, k) == 0) {
+        return tail->v;
       }
     }
   }
   return NULL;
 }
 
-int fnv_put(fnv_t *tbl, const char *k, const char *v, uint_t klen, uint_t vlen) {
+int fnv_put(fnv_tbl_t *tbl, const char *k, const char *v, size_t ksiz, size_t vsiz) {
+  FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, FNV_PUT_OVER_KEYSIZ);
+  FNV_CHKOVERSIZ(vsiz, FNV_VAL_MAX_LENGTH, FNV_PUT_OVER_VALSIZ);
   uint_t h = fnv_hash(k);
-  if (tbl[h].key != NULL) {
-    if (strcmp(tbl[h].key, k) == 0) {
+  fnv_ent_t *ents = tbl->ents;
+  if (ents[h].k != NULL) {
+    if (strcmp(ents[h].k, k) == 0) {
       return FNV_PUT_DUPLICATE;
     }
-    fnv_t *tail = fnv_get_tail(&tbl[h], k, klen);
+    fnv_ent_t *tail = fnv_get_tail(&ents[h], k, ksiz);
     if (!tail) {
       return FNV_PUT_DUPLICATE;
     }
     tail->next = fnv_ent_create();
     fnv_ent_init(tail->next, k, v);
   } else {
-    fnv_ent_init(&tbl[h], k, v);
+    fnv_ent_init(&ents[h], k, v);
   }
   return FNV_PUT_SUCCESS;
 }
 
-int fnv_out(fnv_t *tbl, const char *k, uint_t klen) {
-  uint_t h    = fnv_hash(k);
-  fnv_t *tail = &tbl[h];
-  if (!tail || tail->key == NULL) {
+int fnv_out(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
+  FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, FNV_OUT_OVER_KEYSIZ);
+  uint_t h = fnv_hash(k);
+  fnv_ent_t *tail = &tbl->ents[h];
+  if (!tail || tail->k == NULL) {
     return FNV_OUT_NOTFOUND;
   }
-  if (strcmp(tail->key, k) == 0) {
-    tail->key = NULL;
-    tail->val = NULL;
+  if (strcmp(tail->k, k) == 0) {
+    tail->k = NULL;
+    tail->v = NULL;
     if (tail->next) {
       *tail = *(tail->next);
     }
   } else {
     while (tail->next) {
-      fnv_t *current = tail;
+      fnv_ent_t *current = tail;
       tail = tail->next;
-      if (strcmp(tail->key, k) == 0) {
-        tail->key = NULL;
-        tail->val = NULL;
+      if (strcmp(tail->k, k) == 0) {
+        tail->k = NULL;
+        tail->v = NULL;
         if (tail->next) {
           current->next = tail->next;
         }
@@ -81,27 +98,30 @@ int fnv_out(fnv_t *tbl, const char *k, uint_t klen) {
   return FNV_OUT_SUCCESS;
 }
 
-void fnv_tbl_destroy(fnv_t *tbl, uint_t c) {
+void fnv_tbl_destroy(fnv_tbl_t *tbl, size_t c) {
+  fnv_ent_t *ents = tbl->ents;
   for (int i=0;i<c;++i) {
-    fnv_t *tail = tbl[i].next;
+    fnv_ent_t *tail = ents[i].next;
     while (tail) {
-      fnv_t *current = tail;
+      fnv_ent_t *current = tail;
       tail           = tail->next;
       FNV_FREE(current);
     }
   }
+  FNV_FREE(tbl);
 }
 
-void fnv_tbl_print(fnv_t *tbl, uint_t c) {
+void fnv_tbl_print(fnv_tbl_t *tbl, size_t c) {
+  fnv_ent_t *ents = tbl->ents;
   for (int i=0;i<c;++i) {
-    fnv_t ent = tbl[i];
-    if (ent.key == NULL) continue;
-    printf("i = %d, key = %s, val = %s", i, tbl[i].key, tbl[i].val);
-    if (ent.next != NULL) {
-      fnv_t *tail = ent.next;
+    fnv_ent_t *ent = &ents[i];
+    if (ent->k == NULL) continue;
+    printf("i = %d, key = %s, val = %s", i, ent->k, ent->v);
+    if (ent->next != NULL) {
+      fnv_ent_t *tail = ent->next;
       while (tail) {
-        printf(" -> key = %s, val = %s", tail->key, tail->val);
-        tail =tail->next;
+        printf(" -> key = %s, val = %s", tail->k, tail->v);
+        tail = tail->next;
       }
     }
     printf("\n");
@@ -120,28 +140,45 @@ static uint_t fnv_hash(const char *k) {
     h *= FNV_PRIME;
     h ^= *p;
   }
-  return h % FNV_TBL_CNT;
+  return h % FNV_TBL_CNT_DEFAULT;
 }
 
-static void fnv_ent_init(fnv_t *ent, const char *k, const char *v) {
-  ent->key  = (char *)k;
-  ent->val  = (char *)v;
+static void fnv_ent_init(fnv_ent_t *ent, const char *k, const char *v) {
+  ent->k  = (char *)k;
+  ent->v  = (char *)v;
   ent->next = NULL;
 }
 
-static fnv_t *fnv_get_tail(fnv_t *ent, const char *k, uint_t klen) {
-  fnv_t *tail = ent;
+static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz) {
+  fnv_ent_t *tail = ent;
   while (tail->next) {
     tail = tail->next;
-    if (strcmp(tail->key, k) == 0) {
+    if (strcmp(tail->k, k) == 0) {
       return NULL;
     }
   }
   return tail;
 }
 
-static fnv_t *fnv_ent_create() {
-  fnv_t *ent;
-  FNV_MALLOC(ent, sizeof(fnv_t));
+static fnv_ent_t *fnv_ent_create() {
+  fnv_ent_t *ent;
+  FNV_MALLOC(ent, sizeof(fnv_ent_t));
   return ent;
 }
+
+static bool fnv_isoversiz(size_t len, fnv_type_t t) {
+  bool is_over = false;
+  switch (t) {
+  case FNV_TYPE_KEY :
+    if (len > FNV_KEY_MAX_LENGTH) is_over = true;
+    break;
+  case FNV_TYPE_VAL :
+    if (len > FNV_VAL_MAX_LENGTH) is_over = true;
+    break;
+  default :
+    // not through
+    break;
+  }
+  return is_over;
+}
+
