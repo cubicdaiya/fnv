@@ -98,9 +98,8 @@ static void test_fnv_tbl_init(fnv_tbl_t *tbl, uint_t c) {
 
 static void test_fnv_get(void) {
   fnv_ent_t ent[FNV_TBL_CNT_DEFAULT];
+  fnv_tbl_t *tbl = fnv_tbl_create(ent, FNV_TBL_CNT_DEFAULT);
   uint_t c = sizeof(test_keys) / sizeof(char *);
-  fnv_tbl_t *tbl = fnv_tbl_create(ent, c);
-  fnv_tbl_init(tbl, FNV_TBL_CNT_DEFAULT);
   test_fnv_tbl_init(tbl, c);
   for (int i=0;i<c;++i) {
     CU_ASSERT(fnv_get(tbl, test_keys[i], strlen(test_keys[i])) == (char *)test_keys[i]);
@@ -110,9 +109,8 @@ static void test_fnv_get(void) {
 
 static void test_fnv_get_notfound(void) {
   fnv_ent_t ent[FNV_TBL_CNT_DEFAULT];
+  fnv_tbl_t *tbl = fnv_tbl_create(ent, FNV_TBL_CNT_DEFAULT);
   uint_t c = sizeof(test_keys) / sizeof(char *);
-  fnv_tbl_t *tbl = fnv_tbl_create(ent, c);
-  fnv_tbl_init(tbl, FNV_TBL_CNT_DEFAULT);
   test_fnv_tbl_init(tbl, c);
   CU_ASSERT(fnv_get(tbl, "PUSHD", strlen("PUSHD")) == NULL);
   fnv_tbl_destroy(tbl, FNV_TBL_CNT_DEFAULT);
@@ -120,9 +118,8 @@ static void test_fnv_get_notfound(void) {
 
 static void test_fnv_put_success(void) {
   fnv_ent_t ent[FNV_TBL_CNT_DEFAULT];
+  fnv_tbl_t *tbl = fnv_tbl_create(ent, FNV_TBL_CNT_DEFAULT);
   uint_t c = sizeof(test_keys) / sizeof(char *);
-  fnv_tbl_t *tbl = fnv_tbl_create(ent, c);
-  fnv_tbl_init(tbl, FNV_TBL_CNT_DEFAULT);
   test_fnv_tbl_init(tbl, c);
   CU_ASSERT(fnv_put(tbl, "PUSHD", "POPD", strlen("PUSHD"), strlen("POPD")) == FNV_PUT_SUCCESS);
   fnv_tbl_destroy(tbl, FNV_TBL_CNT_DEFAULT);
@@ -130,9 +127,8 @@ static void test_fnv_put_success(void) {
 
 static void test_fnv_put_duplicate(void) {
   fnv_ent_t ent[FNV_TBL_CNT_DEFAULT];
+  fnv_tbl_t *tbl = fnv_tbl_create(ent, FNV_TBL_CNT_DEFAULT);
   uint_t c = sizeof(test_keys) / sizeof(char *);
-  fnv_tbl_t *tbl = fnv_tbl_create(ent, c);
-  fnv_tbl_init(tbl, FNV_TBL_CNT_DEFAULT);
   test_fnv_tbl_init(tbl, c);
   CU_ASSERT(fnv_put(tbl, "LD", "LDD", strlen("LD"), strlen("LDD")) == FNV_PUT_DUPLICATE);
   fnv_tbl_destroy(tbl, FNV_TBL_CNT_DEFAULT);
@@ -140,9 +136,8 @@ static void test_fnv_put_duplicate(void) {
 
 static void test_fnv_out_success(void) {
   fnv_ent_t ent[FNV_TBL_CNT_DEFAULT];
+  fnv_tbl_t *tbl = fnv_tbl_create(ent, FNV_TBL_CNT_DEFAULT);
   uint_t c = sizeof(test_keys) / sizeof(char *);
-  fnv_tbl_t *tbl = fnv_tbl_create(ent, c);
-  fnv_tbl_init(tbl, FNV_TBL_CNT_DEFAULT);
   test_fnv_tbl_init(tbl, c);
   CU_ASSERT(fnv_out(tbl, "LD",   strlen("LD"))   == FNV_OUT_SUCCESS);
   CU_ASSERT(fnv_out(tbl, "OUTI", strlen("OUTI")) == FNV_OUT_SUCCESS);
@@ -152,9 +147,8 @@ static void test_fnv_out_success(void) {
 
 static void test_fnv_out_notfound(void) {
   fnv_ent_t ent[FNV_TBL_CNT_DEFAULT];
+  fnv_tbl_t *tbl = fnv_tbl_create(ent, FNV_TBL_CNT_DEFAULT);
   uint_t c = sizeof(test_keys) / sizeof(char *);
-  fnv_tbl_t *tbl = fnv_tbl_create(ent, c);
-  fnv_tbl_init(tbl, FNV_TBL_CNT_DEFAULT);
   test_fnv_tbl_init(tbl, c);
   CU_ASSERT(fnv_out(tbl, "PUSHD", strlen("PUSHD")) == FNV_OUT_NOTFOUND);
   fnv_tbl_destroy(tbl, FNV_TBL_CNT_DEFAULT);

@@ -7,13 +7,15 @@ static uint_t fnv_hash(const char *k);
 static fnv_ent_t *fnv_ent_create();
 static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz);
 static void fnv_ent_init(fnv_ent_t *ent, const char *k, const char *v);
-static bool fnv_isoversiz(size_t len, fnv_type_t t);
 
 fnv_tbl_t *fnv_tbl_create(fnv_ent_t *ents, size_t c) {
   fnv_tbl_t *tbl;
   FNV_MALLOC(tbl, sizeof(fnv_tbl_t));
   tbl->ents = ents;
   tbl->c    = c;
+  for (int i=0;i<c;++i) {
+    fnv_ent_init(&ents[i], NULL, NULL);
+  }
   return tbl;
 }
 
@@ -164,21 +166,5 @@ static fnv_ent_t *fnv_ent_create() {
   fnv_ent_t *ent;
   FNV_MALLOC(ent, sizeof(fnv_ent_t));
   return ent;
-}
-
-static bool fnv_isoversiz(size_t len, fnv_type_t t) {
-  bool is_over = false;
-  switch (t) {
-  case FNV_TYPE_KEY :
-    if (len > FNV_KEY_MAX_LENGTH) is_over = true;
-    break;
-  case FNV_TYPE_VAL :
-    if (len > FNV_VAL_MAX_LENGTH) is_over = true;
-    break;
-  default :
-    // not through
-    break;
-  }
-  return is_over;
 }
 
