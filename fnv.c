@@ -3,7 +3,7 @@
 /**
  * private function
  */
-static uint_t fnv_hash(const char *k);
+static uint_t fnv_hash(fnv_tbl_t *tbl, const char *k);
 static fnv_ent_t *fnv_ent_create();
 static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz);
 static void fnv_ent_init(fnv_ent_t *ent, const char *k, const char *v);
@@ -19,7 +19,6 @@ fnv_tbl_t *fnv_tbl_create(fnv_ent_t *ents, size_t c) {
   return tbl;
 }
 
-
 void fnv_tbl_init(fnv_tbl_t *tbl, size_t c) {
   fnv_ent_t *ents = tbl->ents;
   for (int i=0;i<c;++i) {
@@ -30,7 +29,7 @@ void fnv_tbl_init(fnv_tbl_t *tbl, size_t c) {
 char *fnv_get(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
   FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, NULL);
   fnv_ent_t *ents = tbl->ents;
-  uint_t h = fnv_hash(k);
+  uint_t h = fnv_hash(tbl, k);
   if (ents[h].k == NULL) {
     return NULL;
   }
@@ -51,7 +50,7 @@ char *fnv_get(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
 int fnv_put(fnv_tbl_t *tbl, const char *k, const char *v, size_t ksiz, size_t vsiz) {
   FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, FNV_PUT_OVER_KEYSIZ);
   FNV_CHKOVERSIZ(vsiz, FNV_VAL_MAX_LENGTH, FNV_PUT_OVER_VALSIZ);
-  uint_t h = fnv_hash(k);
+  uint_t h = fnv_hash(tbl, k);
   fnv_ent_t *ents = tbl->ents;
   if (ents[h].k != NULL) {
     if (strcmp(ents[h].k, k) == 0) {
@@ -71,7 +70,7 @@ int fnv_put(fnv_tbl_t *tbl, const char *k, const char *v, size_t ksiz, size_t vs
 
 int fnv_out(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
   FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, FNV_OUT_OVER_KEYSIZ);
-  uint_t h = fnv_hash(k);
+  uint_t h = fnv_hash(tbl, k);
   fnv_ent_t *tail = &tbl->ents[h];
   if (!tail || tail->k == NULL) {
     return FNV_OUT_NOTFOUND;
@@ -100,8 +99,9 @@ int fnv_out(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
   return FNV_OUT_SUCCESS;
 }
 
-void fnv_tbl_destroy(fnv_tbl_t *tbl, size_t c) {
+void fnv_tbl_destroy(fnv_tbl_t *tbl) {
   fnv_ent_t *ents = tbl->ents;
+  size_t c = tbl->c;
   for (int i=0;i<c;++i) {
     fnv_ent_t *tail = ents[i].next;
     while (tail) {
@@ -136,13 +136,13 @@ void fnv_tbl_print(fnv_tbl_t *tbl, size_t c) {
  * The algorithm implemented here is based on FNV hash algorithm
  * described by Glenn Fowler, Phong Vo, Landon Curt Noll
  */
-static uint_t fnv_hash(const char *k) {
+static uint_t fnv_hash(fnv_tbl_t *tbl, const char *k) {
   uint_t h = FNV_OFFSET_BASIS;
   for (uchar_t *p=(uchar_t *)k;*p!='\0';++p) {
     h *= FNV_PRIME;
     h ^= *p;
   }
-  return h % FNV_TBL_CNT_DEFAULT;
+  return h % tbl->c;
 }
 
 static void fnv_ent_init(fnv_ent_t *ent, const char *k, const char *v) {

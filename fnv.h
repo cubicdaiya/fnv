@@ -70,7 +70,7 @@ void fnv_tbl_init(fnv_tbl_t *tbl, size_t c);
 char *fnv_get(fnv_tbl_t *tbl, const char *k, size_t ksiz);
 int fnv_put(fnv_tbl_t *tbl, const char *k, const char *v, size_t ksiz, size_t vsiz);
 int fnv_out(fnv_tbl_t *tbl, const char *k, size_t ksiz);
-void fnv_tbl_destroy(fnv_tbl_t *tbl, size_t c);
+void fnv_tbl_destroy(fnv_tbl_t *tbl);
 void fnv_tbl_print(fnv_tbl_t *tbl, size_t c);
 
 #endif // FNV_H
