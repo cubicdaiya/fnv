@@ -19,13 +19,6 @@ fnv_tbl_t *fnv_tbl_create(fnv_ent_t *ents, size_t c) {
   return tbl;
 }
 
-void fnv_tbl_init(fnv_tbl_t *tbl, size_t c) {
-  fnv_ent_t *ents = tbl->ents;
-  for (int i=0;i<c;++i) {
-    fnv_ent_init(&ents[i], NULL, NULL);
-  }
-}
-
 char *fnv_get(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
   FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, NULL);
   fnv_ent_t *ents = tbl->ents;
