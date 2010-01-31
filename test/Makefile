@@ -16,7 +16,7 @@ fnv_test : $(OBJS)
 	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LFLAGS)
 
 check :
-	./fnv_test
+	@./fnv_test
 
 clean :
 	rm $(OBJS) $(TARGETS)
