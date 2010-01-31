@@ -41,7 +41,7 @@
 static uint_t fnv_hash(fnv_tbl_t *tbl, const char *k);
 static fnv_ent_t *fnv_ent_create();
 static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz);
-static void fnv_ent_init(fnv_ent_t *ent, const char *k, const char *v);
+static void fnv_ent_init(fnv_ent_t *ent, const char *k, const void *v);
 
 fnv_tbl_t *fnv_tbl_create(fnv_ent_t *ents, size_t c) {
   fnv_tbl_t *tbl;
@@ -75,7 +75,7 @@ char *fnv_get(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
   return NULL;
 }
 
-int fnv_put(fnv_tbl_t *tbl, const char *k, const char *v, size_t ksiz, size_t vsiz) {
+int fnv_put(fnv_tbl_t *tbl, const char *k, const void *v, size_t ksiz, size_t vsiz) {
   FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, FNV_PUT_OVER_KEYSIZ);
   FNV_CHKOVERSIZ(vsiz, FNV_VAL_MAX_LENGTH, FNV_PUT_OVER_VALSIZ);
   uint_t h = fnv_hash(tbl, k);
@@ -146,11 +146,11 @@ void fnv_tbl_print(fnv_tbl_t *tbl, size_t c) {
   for (int i=0;i<c;++i) {
     fnv_ent_t *ent = &ents[i];
     if (ent->k == NULL) continue;
-    printf("i = %d, key = %s, val = %s", i, ent->k, ent->v);
+    printf("i = %d, key = %s, val = %s", i, ent->k, (char *)ent->v);
     if (ent->next != NULL) {
       fnv_ent_t *tail = ent->next;
       while (tail) {
-        printf(" -> key = %s, val = %s", tail->k, tail->v);
+        printf(" -> key = %s, val = %s", tail->k, (char *)tail->v);
         tail = tail->next;
       }
     }
@@ -173,7 +173,7 @@ static uint_t fnv_hash(fnv_tbl_t *tbl, const char *k) {
   return h % tbl->c;
 }
 
-static void fnv_ent_init(fnv_ent_t *ent, const char *k, const char *v) {
+static void fnv_ent_init(fnv_ent_t *ent, const char *k, const void *v) {
   ent->k  = (char *)k;
   ent->v  = (char *)v;
   ent->next = NULL;

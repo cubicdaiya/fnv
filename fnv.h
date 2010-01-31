@@ -91,7 +91,7 @@ typedef unsigned char uchar_t;
 
 typedef struct fnv_ent_s {
   char *k;
-  char *v;
+  void *v;
   struct fnv_ent_s *next;
 } fnv_ent_t;
 
@@ -102,7 +102,7 @@ typedef struct fnv_tbl_s {
 
 fnv_tbl_t *fnv_tbl_create(fnv_ent_t *ents, size_t c);
 char *fnv_get(fnv_tbl_t *tbl, const char *k, size_t ksiz);
-int fnv_put(fnv_tbl_t *tbl, const char *k, const char *v, size_t ksiz, size_t vsiz);
+int fnv_put(fnv_tbl_t *tbl, const char *k, const void *v, size_t ksiz, size_t vsiz);
 int fnv_out(fnv_tbl_t *tbl, const char *k, size_t ksiz);
 void fnv_tbl_destroy(fnv_tbl_t *tbl);
 void fnv_tbl_print(fnv_tbl_t *tbl, size_t c);
