@@ -43,6 +43,9 @@ static fnv_ent_t *fnv_ent_create();
 static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz);
 static void fnv_ent_init(fnv_ent_t *ent, const char *k, const void *v);
 
+/**
+ * create hash table
+ */
 fnv_tbl_t *fnv_tbl_create(fnv_ent_t *ents, size_t c) {
   fnv_tbl_t *tbl;
   FNV_MALLOC(tbl, sizeof(fnv_tbl_t));
@@ -54,6 +57,9 @@ fnv_tbl_t *fnv_tbl_create(fnv_ent_t *ents, size_t c) {
   return tbl;
 }
 
+/**
+ * get entry from key
+ */
 char *fnv_get(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
   FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, NULL);
   fnv_ent_t *ents = tbl->ents;
@@ -75,6 +81,9 @@ char *fnv_get(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
   return NULL;
 }
 
+/**
+ * insert entry to hash table
+ */
 int fnv_put(fnv_tbl_t *tbl, const char *k, const void *v, size_t ksiz, size_t vsiz) {
   FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, FNV_PUT_OVER_KEYSIZ);
   FNV_CHKOVERSIZ(vsiz, FNV_VAL_MAX_LENGTH, FNV_PUT_OVER_VALSIZ);
@@ -96,6 +105,9 @@ int fnv_put(fnv_tbl_t *tbl, const char *k, const void *v, size_t ksiz, size_t vs
   return FNV_PUT_SUCCESS;
 }
 
+/**
+ * delete entry from hash table
+ */
 int fnv_out(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
   FNV_CHKOVERSIZ(ksiz, FNV_KEY_MAX_LENGTH, FNV_OUT_OVER_KEYSIZ);
   uint_t h = fnv_hash(tbl, k);
@@ -127,6 +139,9 @@ int fnv_out(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
   return FNV_OUT_SUCCESS;
 }
 
+/**
+ * release hash table
+ */
 void fnv_tbl_destroy(fnv_tbl_t *tbl) {
   fnv_ent_t *ents = tbl->ents;
   size_t c = tbl->c;
@@ -141,6 +156,9 @@ void fnv_tbl_destroy(fnv_tbl_t *tbl) {
   FNV_FREE(tbl);
 }
 
+/**
+ * print entries of hash table
+ */
 void fnv_tbl_print(fnv_tbl_t *tbl, size_t c) {
   fnv_ent_t *ents = tbl->ents;
   for (int i=0;i<c;++i) {
@@ -173,12 +191,18 @@ static uint_t fnv_hash(fnv_tbl_t *tbl, const char *k) {
   return h % tbl->c;
 }
 
+/**
+ * initialize entry
+ */
 static void fnv_ent_init(fnv_ent_t *ent, const char *k, const void *v) {
   ent->k  = (char *)k;
   ent->v  = (char *)v;
   ent->next = NULL;
 }
 
+/**
+ * get trailing element of entry list
+ */
 static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz) {
   fnv_ent_t *tail = ent;
   while (tail->next) {
@@ -190,6 +214,9 @@ static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz) {
   return tail;
 }
 
+/**
+ * create entry of hash table
+ */
 static fnv_ent_t *fnv_ent_create() {
   fnv_ent_t *ent;
   FNV_MALLOC(ent, sizeof(fnv_ent_t));
