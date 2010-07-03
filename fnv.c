@@ -119,17 +119,23 @@ int fnv_out(fnv_tbl_t *tbl, const char *k, size_t ksiz) {
         tail->k = NULL;
         tail->v = NULL;
         if (tail->next) {
-            *tail = *(tail->next);
+            fnv_ent_t *new = tail->next->next;
+            memcpy(tail, tail->next, sizeof(tail));
+            FNV_FREE(tail->next);
+            tail->next = new;
         }
     } else {
         while (tail->next) {
             fnv_ent_t *current = tail;
             tail = tail->next;
             if (strcmp(tail->k, k) == 0) {
-                tail->k = NULL;
-                tail->v = NULL;
-                if (tail->next) {
-                    current->next = tail->next;
+                fnv_ent_t *next;
+                next = tail->next;
+                FNV_FREE(tail);
+                if (next) {
+                    current->next = next;
+                } else {
+                    current->next = NULL;
                 }
                 return FNV_OUT_SUCCESS;
             }

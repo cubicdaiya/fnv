@@ -131,7 +131,8 @@ static void test_fnv_put_duplicate(void) {
     fnv_tbl_t *tbl = fnv_tbl_create(ent, FNV_TBL_CNT_DEFAULT);
     uint_t c = sizeof(test_keys) / sizeof(char *);
     test_fnv_tbl_init(tbl, c);
-    CU_ASSERT(fnv_put(tbl, "LD", "LDD", strlen("LD"), strlen("LDD")) == FNV_PUT_DUPLICATE);
+    CU_ASSERT(fnv_put(tbl, "LD",  "LDD", strlen("LD"),  strlen("LDD")) == FNV_PUT_DUPLICATE);
+    CU_ASSERT(fnv_put(tbl, "LDD", "LDD", strlen("LDD"), strlen("LDD")) == FNV_PUT_DUPLICATE);
     fnv_tbl_destroy(tbl);
 }
 
@@ -143,6 +144,14 @@ static void test_fnv_out_success(void) {
     CU_ASSERT(fnv_out(tbl, "LD",   strlen("LD"))   == FNV_OUT_SUCCESS);
     CU_ASSERT(fnv_out(tbl, "OUTI", strlen("OUTI")) == FNV_OUT_SUCCESS);
     CU_ASSERT(fnv_out(tbl, "EI",   strlen("EI"))   == FNV_OUT_SUCCESS);
+    CU_ASSERT(fnv_out(tbl, "OTIR", strlen("OTIR")) == FNV_OUT_SUCCESS);
+    CU_ASSERT(fnv_out(tbl, "EXX",  strlen("EXX"))  == FNV_OUT_SUCCESS);
+
+    CU_ASSERT(fnv_get(tbl, "LD",   strlen("LD"))   == NULL);
+    CU_ASSERT(fnv_get(tbl, "OUTI", strlen("OUTI")) == NULL);
+    CU_ASSERT(fnv_get(tbl, "EI",   strlen("EI"))   == NULL);
+    CU_ASSERT(fnv_get(tbl, "OTIR", strlen("OTIR")) == NULL);
+
     fnv_tbl_destroy(tbl);
 }
 
@@ -163,6 +172,13 @@ static void test_fnv_minimul_cnt(void) {
     for (int i=0;i<c;++i) {
         CU_ASSERT(fnv_get(tbl, test_keys[i], strlen(test_keys[i])) == (char *)test_keys[i]);
     }
+    
+    CU_ASSERT(fnv_out(tbl, "LD",   strlen("LD"))   == FNV_OUT_SUCCESS);
+    CU_ASSERT(fnv_out(tbl, "OUTI", strlen("OUTI")) == FNV_OUT_SUCCESS);
+    CU_ASSERT(fnv_out(tbl, "EI",   strlen("EI"))   == FNV_OUT_SUCCESS);
+    CU_ASSERT(fnv_out(tbl, "OTIR", strlen("OTIR")) == FNV_OUT_SUCCESS);
+    CU_ASSERT(fnv_out(tbl, "EXX",  strlen("EXX"))  == FNV_OUT_SUCCESS);
+    
     fnv_tbl_destroy(tbl);
 }
 

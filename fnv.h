@@ -50,10 +50,12 @@
         }                                       \
     } while(false)
 
-#define FNV_FREE(p)                             \
-    do {                                        \
-        free(p);                                \
-        (p) = NULL;                             \
+#define FNV_FREE(p)                                 \
+    do {                                            \
+        if (p != NULL) {                            \
+            free(p);                                \
+            (p) = NULL;                             \
+        }                                           \
     } while(false)
 
 #define FNV_CHKOVERSIZ(siz, max, ret)             \

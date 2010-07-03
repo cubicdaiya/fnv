@@ -2,7 +2,7 @@
 VPATH = ../
 
 CC = gcc
-CFLAGS = -Wall -g -std=c99
+CFLAGS = -Wall -O2 -std=c99
 LFLAGS = -lcunit
 OBJS = fnv_test.o fnv.o
 TARGETS = fnv_test
