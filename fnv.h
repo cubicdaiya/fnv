@@ -42,14 +42,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define FNV_MALLOC(p, n)                        \
-    do {                                        \
-        if (((p) = malloc(n)) == NULL) {        \
-            printf("malloc failed");            \
-            exit(-1);                           \
-        }                                       \
-    } while(false)
-
 #define FNV_FREE(p)                                 \
     do {                                            \
         if (p != NULL) {                            \

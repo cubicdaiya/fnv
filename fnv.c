@@ -48,7 +48,10 @@ static void fnv_ent_init(fnv_ent_t *ent, const char *k, const void *v);
  */
 fnv_tbl_t *fnv_tbl_create(fnv_ent_t *ents, size_t c) {
     fnv_tbl_t *tbl;
-    FNV_MALLOC(tbl, sizeof(fnv_tbl_t));
+    tbl = malloc(sizeof(fnv_tbl_t));
+    if (tbl == NULL) {
+        return NULL;
+    }
     tbl->ents = ents;
     tbl->c    = c;
     for (int i=0;i<c;++i) {
@@ -226,7 +229,10 @@ static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz) {
  */
 static fnv_ent_t *fnv_ent_create() {
     fnv_ent_t *ent;
-    FNV_MALLOC(ent, sizeof(fnv_ent_t));
+    ent = malloc(sizeof(fnv_ent_t));
+    if (env == NULL) {
+        return NULL;
+    }
     return ent;
 }
 
