@@ -230,7 +230,7 @@ static fnv_ent_t *fnv_get_tail(fnv_ent_t *ent, const char *k, size_t ksiz) {
 static fnv_ent_t *fnv_ent_create() {
     fnv_ent_t *ent;
     ent = malloc(sizeof(fnv_ent_t));
-    if (env == NULL) {
+    if (ent == NULL) {
         return NULL;
     }
     return ent;
